@@ -1,0 +1,63 @@
+// ==UserScript==
+// @name         Bypass Link Rút Gọn
+// @namespace    http://tampermonkey.net/
+// @version      1.0
+// @description  Tự động bypass một số link rút gọn như Linkvertise, AdFly, Rekonise, ouo.io
+// @author       Bạn
+// @match        *://*/*
+// @grant        none
+// ==/UserScript==
+
+(function() {
+    'use strict';
+
+    const currentUrl = window.location.href;
+
+    // Danh sách các dịch vụ rút gọn cần bypass
+    const supportedShorteners = [
+        "linkvertise.com",
+        "rekonise.com",
+        "adf.ly",
+        "sh.st",
+        "ouo.io"
+    ];
+
+    // Kiểm tra nếu URL hiện tại thuộc dịch vụ cần bypass
+    if (supportedShorteners.some(domain => currentUrl.includes(domain))) {
+        console.log("🔹 Bypass phát hiện link rút gọn:", currentUrl);
+        bypassLink(currentUrl);
+    }
+
+    function bypassLink(url) {
+        let apiBypass = "";
+
+        if (url.includes("linkvertise")) {
+            apiBypass = `https://api-bypass.robloxexecutorth.workers.dev/linkvertise?url=${encodeURIComponent(url)}`;
+        } else if (url.includes("rekonise")) {
+            apiBypass = `https://api-bypass.robloxexecutorth.workers.dev/rekonise?url=${encodeURIComponent(url)}`;
+        } else if (url.includes("adf.ly")) {
+            apiBypass = `https://api.bypass.vip/adfly?url=${encodeURIComponent(url)}`;
+        } else if (url.includes("sh.st")) {
+            apiBypass = `https://api.bypass.vip/shst?url=${encodeURIComponent(url)}`;
+        } else if (url.includes("ouo.io")) {
+            apiBypass = `https://api.bypass.vip/ouoio?url=${encodeURIComponent(url)}`;
+        }
+
+        if (apiBypass) {
+            console.log("🔹 Gửi request API bypass:", apiBypass);
+            fetch(apiBypass)
+                .then(response => response.text())
+                .then(bypassedUrl => {
+                    if (bypassedUrl.startsWith("http")) {
+                        console.log("✅ Link gốc:", bypassedUrl);
+                        window.location.href = bypassedUrl; // Chuyển hướng tới link gốc
+                    } else {
+                        console.warn("⚠️ Không tìm thấy link gốc!");
+                    }
+                })
+                .catch(error => console.error("❌ Lỗi khi gọi API Bypass:", error));
+        } else {
+            console.warn("⚠️ Không tìm thấy API phù hợp cho link này.");
+        }
+    }
+})();
